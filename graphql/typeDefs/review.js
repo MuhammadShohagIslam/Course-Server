@@ -15,7 +15,7 @@ module.exports = `
     type UpdatedReview{
         acknowledged: Boolean,
         modifiedCount: Int,
-        upsertedId: null | String,
+        upsertedId: String,
         upsertedCount: Int,
         matchedCount: Int
     }
@@ -38,11 +38,11 @@ module.exports = `
         getAllReview: [Review!]!,
         getReview(reviewId: ID!): Review!
     }
-    
+
     type Mutation{
         createNewReview(input: CreateNewReviewInput!): Review!,
-        removeReview(reviewId: ID!): DeleteReview! ,
-        updateReview(reviewId: ID!, input: UpdateReviewInput!): UpdatedReview!
+        updateReview(reviewId: ID!, input: UpdateReviewInput!): UpdatedReview!,
+        removeReview(reviewId: ID!): DeleteReview!
     }
 
 `;
