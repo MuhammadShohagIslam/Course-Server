@@ -1,6 +1,6 @@
 const User = require("../models/user.model");
 
-const createNewUserController = async (parent, args, { req }) => {
+const createNewUserController = async (parent, args) => {
     const newUser = new User({
         ...args.input,
     });
@@ -8,7 +8,7 @@ const createNewUserController = async (parent, args, { req }) => {
     return user;
 };
 
-const getAllUsersController = async (parent, args, { req }) => {
+const getAllUsersController = async (parent, args) => {
     const users = await User.find({});
     return users;
 };

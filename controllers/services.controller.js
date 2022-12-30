@@ -1,4 +1,6 @@
 const Service = require("../models/service.model");
+const { GraphQLError } = require("graphql");
+
 // get all services
 const getAllServiceController = async (parent, args) => {
     try {
@@ -6,54 +8,67 @@ const getAllServiceController = async (parent, args) => {
         const sort = {
             createdAt: -1,
         };
+
         let services;
         if (args.limit) {
             services = await Service.find(query)
                 .sort(sort)
                 .limit(args.limit)
-                .toArray();
+                .exec();
         } else {
-            services = await Service.find(query).sort(sort).toArray();
+            services = await Service.find(query).sort(sort).exec();
         }
         return services;
     } catch (error) {
-        throw new GraphQLError("Something Went Wrong", {
+        throw new GraphQLError(error.message, {
             extensions: {
-                code: "UNAUTHENTICATED",
+                code: 501,
                 http: { status: 501 },
             },
         });
     }
 };
 
-// // get service by serviceId
-// app.get("/services/:serviceId", async (req, res) => {
-//     try {
-//         const query = {
-//             _id: ObjectId(req.params.serviceId),
-//         };
-//         const service = await serviceCollection.findOne(query);
-//         res.status(200).json(service);
-//     } catch (error) {
-//         res.status(500).send({ message: error.message });
-//     }
-// });
+// get service by serviceId
+const getServiceByServiceIdController = async (parent, args) => {
+    try {
+        const query = {
+            _id: args.serviceId,
+        };
+        const service = await Service.findOne(query);
+        return service;
+    } catch (error) {
+        throw new GraphQLError(error.message, {
+            extensions: {
+                code: 500,
+                http: { status: 500 },
+            },
+        });
+    }
+};
 
-// // create new service
-// app.post("/services", async (req, res) => {
-//     try {
-//         const serviceObject = {
-//             ...req.body,
-//             createdAt: Date.now(),
-//         };
+// create new service
+const createNewServiceController = async (parent, args) => {
+    try {
+        const serviceObject = {
+            ...args.input
+        };
 
-//         const newService = await serviceCollection.insertOne(serviceObject);
-//         res.status(201).json(newService);
-//     } catch (error) {
-//         res.status(500).send({ message: error.message });
-//     }
-// });
+        const newService = new Service(serviceObject);
+        const newServiceSave = await newService.save();
+        return newServiceSave;
+    } catch (error) {
+        throw new GraphQLError(error.message, {
+            extensions: {
+                code: 500,
+                http: { status: 500 },
+            },
+        });
+    }
+};
 
 module.exports = {
     getAllServiceController,
+    getServiceByServiceIdController,
+    createNewServiceController
 };

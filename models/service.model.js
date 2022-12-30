@@ -5,7 +5,6 @@ const serviceSchema = new Schema(
     {
         name: {
             type: String,
-            unique: true,
             index: true,
         },
         description: {
