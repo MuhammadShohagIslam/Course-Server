@@ -59,12 +59,12 @@ const getAllReviewController = async (parent, args) => {
 };
 
 // get all reviews by specific user
-const getReviewBySpecificUserController = async (parent, args) => {
+const getReviewBySpecificUserController = async (parent, args, {req}) => {
     try {
-        const decodedUser = checkAuth(req);
+        const decodedUser = await checkAuth(req);
         if (
-            decodedUser.name !== args.email ||
-            decodedUser.email !== args.name
+            decodedUser.name !== args.name ||
+            decodedUser.email !== args.email
         ) {
             throw new GraphQLError("Unauthorize Access", {
                 extensions: {
