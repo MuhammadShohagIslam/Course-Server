@@ -8,7 +8,7 @@ module.exports = `
     }
     
     type Query {
-        getAllServices(limit: Int!): [Service!]!
+        getAllServices(limit: Int): [Service!]!
         getService(serviceId: ID!):Service!
     }
 

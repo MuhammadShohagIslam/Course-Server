@@ -1,4 +1,6 @@
-module.exports = `
+ module.exports = `
+    scalar Date
+    
     type Review{
         _id: ID!,
         _service: ID!,
@@ -6,7 +8,8 @@ module.exports = `
         name: String!,
         img: String!,
         comment: String,
-        star: Int!
+        star: Int!,
+        createdAt: Date!
     }
     type DeleteReview{
         acknowledged: Boolean,
@@ -35,7 +38,7 @@ module.exports = `
     }
 
     type Query{
-        getAllReview: [Review!]!,
+        getAllReview(query:ID): [Review!]!,
         getReview(reviewId: ID!): Review!
     }
 

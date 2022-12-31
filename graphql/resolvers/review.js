@@ -5,8 +5,10 @@ const {
     updateReviewByReviewIdController,
     removeReviewByReviewIdController,
 } = require("../../controllers/review.controller");
+const dateScalar  = require("../custom-scaler/date.scaler");
 
 module.exports = {
+    Date: dateScalar,
     Query: {
         getAllReview: getAllReviewController,
         getReview: getReviewByReviewIdController,
