@@ -4,6 +4,7 @@ const {
     createNewReviewController,
     updateReviewByReviewIdController,
     removeReviewByReviewIdController,
+    getReviewBySpecificUserController
 } = require("../../controllers/review.controller");
 const dateScalar  = require("../custom-scaler/date.scaler");
 
@@ -12,6 +13,7 @@ module.exports = {
     Query: {
         getAllReview: getAllReviewController,
         getReview: getReviewByReviewIdController,
+        getReviewBySpecificUser: getReviewBySpecificUserController,
     },
     Mutation: {
         createNewReview: createNewReviewController,

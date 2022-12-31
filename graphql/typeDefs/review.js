@@ -5,8 +5,9 @@
         _id: ID!,
         _service: ID!,
         serviceName: String!,
-        name: String!,
+        name: String,
         img: String!,
+        email: String,
         comment: String,
         star: Int!,
         createdAt: Date!
@@ -27,19 +28,21 @@
     input CreateNewReviewInput{
         _service: ID!,
         serviceName: String!,
-        name: String!,
+        name: String,
+        email: String,
         img: String!,
         comment: String,
         star: Int! 
     }
     input UpdateReviewInput{
         comment: String,
-        star: Int! 
+        star: Int!,
     }
 
     type Query{
         getAllReview(query:ID): [Review!]!,
-        getReview(reviewId: ID!): Review!
+        getReview(reviewId: ID!): Review!,
+        getReviewBySpecificUser(name: String, email:String!): [Review!]!
     }
 
     type Mutation{

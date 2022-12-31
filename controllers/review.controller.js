@@ -1,5 +1,6 @@
 const Review = require("../models/review.model");
 const { GraphQLError } = require("graphql");
+const { checkAuth } = require("../helper/checkAuth.helper");
 
 // create new review
 const createNewReviewController = async (parent, args) => {
@@ -47,6 +48,35 @@ const getAllReviewController = async (parent, args) => {
             reviews = await Review.find({}).exec();
         }
         return reviews;
+    } catch (error) {
+        throw new GraphQLError(error.message, {
+            extensions: {
+                code: 500,
+                http: { status: 500 },
+            },
+        });
+    }
+};
+
+// get all reviews by specific user
+const getReviewBySpecificUserController = async (parent, args) => {
+    try {
+        const decodedUser = checkAuth(req);
+        if (
+            decodedUser.name !== args.email ||
+            decodedUser.email !== args.name
+        ) {
+            throw new GraphQLError("Unauthorize Access", {
+                extensions: {
+                    code: 401,
+                    http: { status: 500 },
+                },
+            });
+        }
+        if (args.email || args.name) {
+            const reviews = await Review.find({ email: args.email }).exec();
+            return reviews;
+        }
     } catch (error) {
         throw new GraphQLError(error.message, {
             extensions: {
@@ -118,6 +148,7 @@ module.exports = {
     createNewReviewController,
     getAllReviewController,
     getReviewByReviewIdController,
+    getReviewBySpecificUserController,
     updateReviewByReviewIdController,
     removeReviewByReviewIdController,
 };

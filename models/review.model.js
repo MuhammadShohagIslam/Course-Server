@@ -9,8 +9,10 @@ const reviewSchema = new Schema(
             index: true,
         },
         name:{
-            type: String,
-            required:true
+            type: String
+        },
+        email:{
+            type: String
         },
         img: {
             type: String,
