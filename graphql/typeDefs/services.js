@@ -6,9 +6,15 @@ module.exports = `
         img:String!,
         price: String!
     }
+
+    type ServiceByPage{
+        servicesByPagination: [Service!]!,
+        totalService: Int!
+    }
     
     type Query {
-        getAllServices(limit: Int): [Service!]!
+        getAllServicesUnderLimit(limit: Int): [Service!]!
+        getAllServiceByPage(page: Int!): ServiceByPage!
         getService(serviceId: ID!):Service!
     }
 

@@ -1,12 +1,14 @@
 const {
-    getAllServiceController,
+    getAllServiceByPageController,
     getServiceByServiceIdController,
     createNewServiceController,
+    getAllServicesUnderLimitController,
 } = require("../../controllers/services.controller");
 
 module.exports = {
     Query: {
-        getAllServices: getAllServiceController,
+        getAllServiceByPage: getAllServiceByPageController,
+        getAllServicesUnderLimit: getAllServicesUnderLimitController,
         getService: getServiceByServiceIdController,
     },
     Mutation: {

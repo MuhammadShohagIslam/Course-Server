@@ -48,7 +48,7 @@
     type Mutation{
         createNewReview(input: CreateNewReviewInput!): Review!,
         updateReview(reviewId: ID!, input: UpdateReviewInput!): UpdatedReview!,
-        removeReview(reviewId: ID!): DeleteReview!
+        removeReview(reviewId: ID!): DeleteReview
     }
 
 `;
