@@ -63,6 +63,23 @@ const getAllServicesUnderLimitController = async (parent, args) => {
     }
 };
 
+// get service by search query
+const getSearchResultController = async (parent, args) => {
+    try {
+        const services = await Service.find({
+            name: { $regex: args.search, $options: "i" },
+        }).exec();
+        return services;
+    } catch (error) {
+        throw new GraphQLError(error.message, {
+            extensions: {
+                code: 500,
+                http: { status: 500 },
+            },
+        });
+    }
+};
+
 // get service by serviceId
 const getServiceByServiceIdController = async (parent, args) => {
     try {
@@ -106,4 +123,5 @@ module.exports = {
     getAllServicesUnderLimitController,
     getServiceByServiceIdController,
     createNewServiceController,
+    getSearchResultController,
 };

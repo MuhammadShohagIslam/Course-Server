@@ -3,6 +3,7 @@ const {
     getServiceByServiceIdController,
     createNewServiceController,
     getAllServicesUnderLimitController,
+    getSearchResultController
 } = require("../../controllers/services.controller");
 
 module.exports = {
@@ -10,6 +11,7 @@ module.exports = {
         getAllServiceByPage: getAllServiceByPageController,
         getAllServicesUnderLimit: getAllServicesUnderLimitController,
         getService: getServiceByServiceIdController,
+        getSearchResult: getSearchResultController
     },
     Mutation: {
         createNewService: createNewServiceController,

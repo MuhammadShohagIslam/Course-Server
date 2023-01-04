@@ -16,6 +16,7 @@ module.exports = `
         getAllServicesUnderLimit(limit: Int): [Service!]!
         getAllServiceByPage(page: Int!): ServiceByPage!
         getService(serviceId: ID!):Service!
+        getSearchResult(search: String!): [Service!]!
     }
 
     # input type
