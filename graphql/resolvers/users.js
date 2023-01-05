@@ -1,9 +1,21 @@
 const { GraphQLError } = require("graphql");
 const User = require("../../models/user.model");
-const { checkAuth } = require("../../helper/checkAuth.helper");
-
+const { checkAuth, adminAuthCheck } = require("../../helper/checkAuth.helper");
 
 const createNewUserHandler = async (parent, args) => {
+    const isExistUser = await User.findOne({
+        email: args.email,
+    });
+    if (isExistUser) {
+        throw new GraphQLError("User Already Exits!", {
+            extensions: {
+                code: "FORBIDDEN",
+                http: {
+                    status: 400,
+                },
+            },
+        });
+    }
     const newUser = new User({
         ...args.input,
     });
@@ -11,16 +23,54 @@ const createNewUserHandler = async (parent, args) => {
     return user;
 };
 
-const getAllUsersHandler = async (parent, args) => {
-    const users = await User.find({});
-    return users;
+// get all user by user role
+const getAllUsersByRoleHandler = async (parent, args, { req }) => {
+    try {
+        // auth checking
+        const currentUser = await checkAuth(req);
+        // admin checking
+        const adminCurrent = await adminAuthCheck(currentUser);
+        let users;
+        if (adminCurrent) {
+            users = await User.find({ role: "user" }).exec();
+        }
+        return users;
+    } catch (error) {
+        throw new GraphQLError(error.message, {
+            extensions: {
+                code: 500,
+                http: {
+                    status: 500,
+                },
+            },
+        });
+    }
+};
+
+const getCurrentUserHandler = async (parent, args, { req }) => {
+    try {
+        // auth checking
+        const currentUser = await checkAuth(req);
+        const user = await User.findOne({ email: currentUser.email }).exec();
+        return user;
+    } catch (error) {
+        throw new GraphQLError(error.message, {
+            extensions: {
+                code: 500,
+                http: {
+                    status: 500,
+                },
+            },
+        });
+    }
 };
 
 module.exports = {
     Query: {
-        allUsers: getAllUsersHandler,
+        allUsersByRole: getAllUsersByRoleHandler,
+        currentUser: getCurrentUserHandler
     },
-    Mutation:{
-        createNewUser: createNewUserHandler
-    }
+    Mutation: {
+        createNewUser: createNewUserHandler,
+    },
 };

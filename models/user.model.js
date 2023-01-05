@@ -3,11 +3,6 @@ const { Schema } = mongoose;
 
 const userSchema = new Schema(
     {
-        username: {
-            type: String,
-            unique: true,
-            index: true,
-        },
         fullName: {
             type: String,
         },
@@ -20,6 +15,10 @@ const userSchema = new Schema(
             type: String,
             required: true,
         },
+        role:{
+            type: String,
+            default: "user"
+        }
     },
     { timestamps: true }
 );

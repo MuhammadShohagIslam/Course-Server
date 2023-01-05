@@ -1,22 +1,23 @@
 module.exports = `
     type User {
         _id: ID!
-        userName: String!
         fullName: String!
         email: String!
         profileImage: String!
+        role: String
     }
 
     # input type
     input UserCreateInput {
-        userName: String!
         fullName: String!
         email: String!
         profileImage: String!
+        role: String
     }
 
     type Query {
-        allUsers: [User!]
+        allUsersByRole(role: String!): [User!]
+        currentUser: User!
     }
 
     type Mutation {
