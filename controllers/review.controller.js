@@ -1,6 +1,8 @@
 const Review = require("../models/review.model");
+const { PubSub } = require("graphql-subscriptions");
 const { GraphQLError } = require("graphql");
 const { checkAuth } = require("../helper/checkAuth.helper");
+const pubsub = new PubSub();
 
 // create new review
 const createNewReviewController = async (parent, args) => {
@@ -25,6 +27,9 @@ const createNewReviewController = async (parent, args) => {
         }
         const newReview = new Review(reviewObj);
         const newReviewSave = await newReview.save();
+        pubsub.publish("REVIEW_ADDED", {
+            reviewAdded: newReviewSave,
+        });
         return newReviewSave;
     } catch (error) {
         throw new GraphQLError(error.message, {
@@ -59,7 +64,7 @@ const getAllReviewController = async (parent, args) => {
 };
 
 // get all reviews by specific user
-const getReviewBySpecificUserController = async (parent, args, {req}) => {
+const getReviewBySpecificUserController = async (parent, args, { req }) => {
     try {
         const decodedUser = await checkAuth(req);
         if (

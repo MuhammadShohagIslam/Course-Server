@@ -1,5 +1,33 @@
+const { PubSub } = require("graphql-subscriptions");
 const Service = require("../models/service.model");
 const { GraphQLError } = require("graphql");
+const { SERVICE_CREATED } = require("../graphql/event-labels/event.labels");
+const pubsub = new PubSub();
+
+
+// create new service
+const createNewServiceController = async (parent, args) => {
+    try {
+        const serviceObject = {
+            ...args.input,
+        };
+
+        const newService = new Service(serviceObject);
+        const newServiceSave = await newService.save();
+
+        pubsub.publish("SERVICE_CREATED", {
+            serviceCreated: newServiceSave,
+        });
+        return newServiceSave;
+    } catch (error) {
+        throw new GraphQLError(error.message, {
+            extensions: {
+                code: 500,
+                http: { status: 500 },
+            },
+        });
+    }
+};
 
 // get all services by page
 const getAllServiceByPageController = async (parent, args) => {
@@ -88,26 +116,6 @@ const getServiceByServiceIdController = async (parent, args) => {
         };
         const service = await Service.findOne(query);
         return service;
-    } catch (error) {
-        throw new GraphQLError(error.message, {
-            extensions: {
-                code: 500,
-                http: { status: 500 },
-            },
-        });
-    }
-};
-
-// create new service
-const createNewServiceController = async (parent, args) => {
-    try {
-        const serviceObject = {
-            ...args.input,
-        };
-
-        const newService = new Service(serviceObject);
-        const newServiceSave = await newService.save();
-        return newServiceSave;
     } catch (error) {
         throw new GraphQLError(error.message, {
             extensions: {

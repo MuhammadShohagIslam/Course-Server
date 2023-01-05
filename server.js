@@ -1,19 +1,26 @@
-const { ApolloServer } = require("@apollo/server");
-const { expressMiddleware } = require("@apollo/server/express4");
-const {
-    ApolloServerPluginDrainHttpServer,
-} = require("@apollo/server/plugin/drainHttpServer");
 const express = require("express");
 const http = require("http");
 const cors = require("cors");
 const { json } = require("body-parser");
-const { typeDefs, resolvers } = require("./graphql/schema");
 const { mongo_db_run } = require("./configs/mongodb");
+// graphql
+const { ApolloServer } = require("@apollo/server");
+const { makeExecutableSchema } = require("@graphql-tools/schema");
+const { WebSocketServer } = require("ws");
+const { useServer } = require("graphql-ws/lib/use/ws");
+const { expressMiddleware } = require("@apollo/server/express4");
+const {
+    ApolloServerPluginDrainHttpServer,
+} = require("@apollo/server/plugin/drainHttpServer");
+const { PubSub } = require("graphql-subscriptions");
+const { typeDefs, resolvers } = require("./graphql/schema");
 require("dotenv").config();
 
 const app = express();
 const httpServer = http.createServer(app);
 const PORT = process.env.PORT;
+
+app.use([cors(), json()]);
 
 // Rest API endpoint
 app.get("/rest", (req, res) => {
@@ -22,10 +29,35 @@ app.get("/rest", (req, res) => {
 
 // graphql server
 async function startApolloServer(typeDefs, resolvers) {
+    const schema = makeExecutableSchema({ typeDefs, resolvers });
+    const pubSub = new PubSub();
+    // websocket server
+    const wsServer = new WebSocketServer({
+        server: httpServer,
+        path: "/graphql",
+    });
+
+    const serverCleanup = useServer(
+        {
+            schema,
+        },
+        wsServer
+    );
+
     const server = new ApolloServer({
-        typeDefs,
-        resolvers,
-        plugins: [ApolloServerPluginDrainHttpServer({ httpServer })],
+        schema,
+        plugins: [
+            ApolloServerPluginDrainHttpServer({ httpServer }),
+            {
+                async serverWillStart() {
+                    return {
+                        async drainServer() {
+                            await serverCleanup.dispose();
+                        },
+                    };
+                },
+            },
+        ],
     });
     await server.start();
     app.use(
@@ -33,7 +65,7 @@ async function startApolloServer(typeDefs, resolvers) {
         cors(),
         json(),
         expressMiddleware(server, {
-            context: ({ req, res }) => ({ req, res }),
+            context: ({ req }) => ({ req, pubSub }),
         })
     );
 
@@ -44,6 +76,9 @@ async function startApolloServer(typeDefs, resolvers) {
         mongo_db_run();
         console.log(
             `🚀 GraphQL Server ready at http://localhost:${PORT}/graphql`
+        );
+        console.log(
+            `🚀 Subscriptions is ready at ws://localhost:${PORT}/graphql`
         );
         console.log(`🚀 RestAPI Server ready at http://localhost:${PORT}`);
     });

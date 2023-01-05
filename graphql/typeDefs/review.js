@@ -50,5 +50,7 @@
         updateReview(reviewId: ID!, input: UpdateReviewInput!): UpdatedReview!,
         removeReview(reviewId: ID!): DeleteReview
     }
-
+    type Subscription{
+        reviewAdded: Review
+    }
 `;

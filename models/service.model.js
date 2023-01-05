@@ -19,7 +19,7 @@ const serviceSchema = new Schema(
     },
     { timestamps: true }
 );
-serviceSchema.index({name: 'text', description: 'text'});
+serviceSchema.index({name: 'text'});
 
 const Service = mongoose.model("Services", serviceSchema);
 

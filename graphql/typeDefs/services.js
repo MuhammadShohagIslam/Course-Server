@@ -29,4 +29,7 @@ module.exports = `
     type Mutation{
         createNewService(input:CreateNewServiceInput!):Service! 
     }
+    type Subscription{
+        serviceAdded: Service
+    }
 `;
