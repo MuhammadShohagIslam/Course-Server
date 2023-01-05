@@ -47,6 +47,41 @@ const getAllUsersByRoleHandler = async (parent, args, { req }) => {
     }
 };
 
+const getAdminUserHandler = async (parent, args, { req }) => {
+    try {
+        // auth checking
+        const currentUser = await checkAuth(req);
+        // admin checking
+        const adminCurrent = await adminAuthCheck(currentUser);
+        return isAdmin = adminCurrent?.role === "admin";
+    } catch (error) {
+        throw new GraphQLError(error.message, {
+            extensions: {
+                code: 500,
+                http: {
+                    status: 500,
+                },
+            },
+        });
+    }
+};
+const getUserHandler = async (parent, args, { req }) => {
+    try {
+        // auth checking
+        const currentUser = await checkAuth(req);
+        const user = await User.findOne({ email: currentUser.email }).exec();
+        return isUser = user?.role === "user";
+    } catch (error) {
+        throw new GraphQLError(error.message, {
+            extensions: {
+                code: 500,
+                http: {
+                    status: 500,
+                },
+            },
+        });
+    }
+};
 const getCurrentUserHandler = async (parent, args, { req }) => {
     try {
         // auth checking
@@ -68,7 +103,10 @@ const getCurrentUserHandler = async (parent, args, { req }) => {
 module.exports = {
     Query: {
         allUsersByRole: getAllUsersByRoleHandler,
-        currentUser: getCurrentUserHandler
+        currentUser: getCurrentUserHandler,
+        getAdminUser: getAdminUserHandler,
+        getUser: getUserHandler,
+
     },
     Mutation: {
         createNewUser: createNewUserHandler,

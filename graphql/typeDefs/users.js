@@ -17,11 +17,12 @@ module.exports = `
 
     type Query {
         allUsersByRole(role: String!): [User!]
-        currentUser: User!
+        currentUser(email:String!): User!
+        getAdminUser: Boolean!
+        getUser: Boolean!
     }
 
     type Mutation {
         createNewUser(input: UserCreateInput!): User!
     }
 `;
-
