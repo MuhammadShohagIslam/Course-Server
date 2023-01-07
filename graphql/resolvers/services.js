@@ -125,6 +125,53 @@ const getServiceByServiceIdHandler = async (parent, args) => {
         });
     }
 };
+// update service by serviceId
+const updateServiceByServiceIdHandler = async (parent, args) => {
+    try {
+        const query = {
+            _id: args.serviceId,
+        };
+        const updateDocument = {
+            ...args.input,
+        };
+        const updatedService = await Service.updateOne(query, updateDocument);
+        return updatedService;
+    } catch (error) {
+        throw new GraphQLError(error.message, {
+            extensions: {
+                code: 500,
+                http: { status: 500 },
+            },
+        });
+    }
+};
+
+// delete service by serviceId
+const deletedServiceByServiceIdHandler = async (parent, args) => {
+    try {
+        try {
+            const query = {
+                _id: args.serviceId,
+            };
+            const removedService = await Service.deleteOne(query);
+            return removedService;
+        } catch (error) {
+            throw new GraphQLError(error.message, {
+                extensions: {
+                    code: 500,
+                    http: { status: 500 },
+                },
+            });
+        }
+    } catch (error) {
+        throw new GraphQLError(error.message, {
+            extensions: {
+                code: 500,
+                http: { status: 500 },
+            },
+        });
+    }
+};
 
 module.exports = {
     Query: {
@@ -135,6 +182,8 @@ module.exports = {
     },
     Mutation: {
         createNewService: createNewServiceHandler,
+        updateService: updateServiceByServiceIdHandler,
+        removeService: deletedServiceByServiceIdHandler,
     },
     Subscription: {
         serviceAdded: {
