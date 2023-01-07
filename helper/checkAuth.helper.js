@@ -58,3 +58,25 @@ exports.adminAuthCheck = async (currentUser) => {
         });
     }
 };
+
+exports.authCheckMiddleware = async (req, res, next) => {
+    try {
+        if (req.headers.authorization) {
+            admin
+                .auth()
+                .verifyIdToken(req.headers.authorization)
+                .then(() => {
+                    next();
+                })
+                .catch((error) => {
+                    res.status(401).json({
+                        error: error.message,
+                    });
+                });
+        }
+    } catch (error) {
+        res.status(500).json({
+            error: error.message,
+        });
+    }
+};

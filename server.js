@@ -14,6 +14,10 @@ const {
 } = require("@apollo/server/plugin/drainHttpServer");
 const { PubSub } = require("graphql-subscriptions");
 const { typeDefs, resolvers } = require("./graphql/schema");
+// importing middleware
+const { authCheckMiddleware } = require("./helper/checkAuth.helper");
+// importing controller
+const { upload, remove } = require("./controllers/cloudinary");
 require("dotenv").config();
 
 const app = express();
@@ -68,6 +72,10 @@ async function startApolloServer(typeDefs, resolvers) {
             context: ({ req }) => ({ req, pubSub }),
         })
     );
+
+    // upload and remove images
+    app.post("/upload-images", authCheckMiddleware, upload);
+    app.post("/remove-images", authCheckMiddleware, remove);
 
     const serverListen = new Promise((resolve) =>
         httpServer.listen({ port: PORT }, resolve)
