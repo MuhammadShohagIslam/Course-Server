@@ -24,8 +24,8 @@ const userSchema = new Schema(
             },
             public_id: {
                 type: String,
-                public_id: "12345",
-            },
+                default: `${Date.now()}`,
+            }
         },
         about: {
             type: String,

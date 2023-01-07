@@ -10,7 +10,7 @@ cloudinary.config({
 
 // upload images controller
 exports.upload = async (req, res) =>{
-    let result = await cloudinary.uploader.upload(req.body.image,{
+    let result = await cloudinary.uploader.upload(req.body.uploadImageFile,{
         public_id:`${Date.now()}`,
         resource_type: "auto"
     });

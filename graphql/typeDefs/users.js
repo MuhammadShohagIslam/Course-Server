@@ -1,16 +1,16 @@
 module.exports = `
+    type Img{
+        url: String
+        public_id: String
+    }
     type User {
         _id: ID!
         username: String
         fullName: String
         email: String!
         role: String
+        image:Img
         about:String
-    }
-
-    type Image implements User{
-        url: String
-        public_id: String
     }
     type UserCreate {
         username: String
@@ -19,20 +19,21 @@ module.exports = `
     }
     
     # input type
-    input Image{
+    input ImgInput{
         url: String
         public_id: String
     }
     input UserCreateInput {
         fullName: String
         email: String!
+        image:ImgInput
     }
 
     input ProfileUpdateInput {
         username: String
         fullName: String
         email: String!
-        image:Image
+        image:ImgInput
         about:String
     }
 

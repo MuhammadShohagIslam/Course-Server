@@ -1,7 +1,7 @@
 const express = require("express");
 const http = require("http");
 const cors = require("cors");
-const { json } = require("body-parser");
+const { json, urlencoded } = require("body-parser");
 const { mongo_db_run } = require("./configs/mongodb");
 // graphql
 const { ApolloServer } = require("@apollo/server");
@@ -24,7 +24,11 @@ const app = express();
 const httpServer = http.createServer(app);
 const PORT = process.env.PORT;
 
-app.use([cors(), json()]);
+app.use([
+    cors(),
+    json({ limit: "50mb" }),
+    urlencoded({ limit: "50mb", extended: true }),
+]);
 
 // Rest API endpoint
 app.get("/rest", (req, res) => {

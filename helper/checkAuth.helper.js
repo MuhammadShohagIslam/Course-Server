@@ -5,9 +5,7 @@ const User = require("../models/user.model");
 // verify user auth
 exports.checkAuth = async (req) => {
     try {
-        console.log(req.headers.authorization)
         if (!req.headers.authorization) {
-          
             throw new GraphQLError("User is not authenticated", {
                 extensions: {
                     code: "UNAUTHENTICATED",
@@ -16,14 +14,11 @@ exports.checkAuth = async (req) => {
             });
            
         }
-        console.log("b");
         const currentUser = await admin
             .auth()
             .verifyIdToken(req.headers.authorization);
-        console.log("outsideauth")
         return currentUser;
     } catch (error) {
-        console.log("errorideauth");
         throw new GraphQLError("Forbidden Access!", {
             extensions: {
                 code: "FORBIDDEN",
