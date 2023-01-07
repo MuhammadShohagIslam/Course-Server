@@ -3,7 +3,7 @@ module.exports = `
         _id: ID!,
         name: String!,
         description: String!,
-        img: String,
+        img: Img,
         price: String!
     }
     type ServiceByPage{
@@ -21,26 +21,26 @@ module.exports = `
         acknowledged: Boolean,
         deletedCount: Int
     }
-    type Query {
-        getAllServicesUnderLimit(limit: Int): [Service!]!
-        getAllServiceByPage(page: Int!): ServiceByPage!
-        getService(serviceId: ID!):Service!
-        getSearchResult(search: String!): [Service!]!
-    }
-
+   
     # input type
     input CreateNewServiceInput{
         name: String!,
         description: String!,
-        img:String!,
+        img:ImgInput,
         price: String!
     }
 
     input UpdateServiceInput{
         name: String,
         description: String,
-        img: ImgInput!,
+        img: ImgInput,
         price: String!
+    }
+    type Query {
+        getAllServicesUnderLimit(limit: Int): [Service!]!
+        getAllServiceByPage(page: Int!): ServiceByPage!
+        getService(serviceId: ID!):Service!
+        getSearchResult(search: String!): [Service!]!
     }
     type Mutation{
         createNewService(input:CreateNewServiceInput!):Service! 

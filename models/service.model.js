@@ -11,7 +11,14 @@ const serviceSchema = new Schema(
             type: String,
         },
         img: {
-            type: String,
+            url: {
+                type: String,
+                default: "https://via.placeholder.com/200x200.png?text=Profile",
+            },
+            public_id: {
+                type: String,
+                default: `${Date.now()}`,
+            }
         },
         price: {
             type: String,

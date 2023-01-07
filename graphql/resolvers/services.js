@@ -11,10 +11,8 @@ const createNewServiceHandler = async (parent, args) => {
         const serviceObject = {
             ...args.input,
         };
-
         const newService = new Service(serviceObject);
         const newServiceSave = await newService.save();
-        console.log(newServiceSave)
         pubsub.publish("SERVICE_ADDED", {
             serviceAdded: newServiceSave,
         });
