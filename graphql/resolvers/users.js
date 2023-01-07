@@ -2,25 +2,37 @@ const { GraphQLError } = require("graphql");
 const User = require("../../models/user.model");
 const { checkAuth, adminAuthCheck } = require("../../helper/checkAuth.helper");
 
-const createNewUserHandler = async (parent, args) => {
-    const isExistUser = await User.findOne({
-        email: args.email,
-    });
-    if (isExistUser) {
-        throw new GraphQLError("User Already Exits!", {
+const createOrUpdateNewUserHandler = async (parent, args, { req }) => {
+    try {
+        // auth checking
+        const currentUser = await checkAuth(req);
+        const updatedUser = await User.findOneAndUpdate(
+            { email: currentUser.email },
+            { ...args.input },
+            { new: true }
+        );
+
+        let user;
+        if (updatedUser) {
+            user = updatedUser;
+        } else {
+            const newUser = await new User({
+                ...args.input,
+            }).save();
+            user = newUser;
+        }
+
+        return user;
+    } catch (error) {
+        throw new GraphQLError(error.message, {
             extensions: {
-                code: "FORBIDDEN",
+                code: 500,
                 http: {
-                    status: 400,
+                    status: 500,
                 },
             },
         });
     }
-    const newUser = new User({
-        ...args.input,
-    });
-    const user = await newUser.save();
-    return user;
 };
 
 // get all user by user role
@@ -53,7 +65,7 @@ const getAdminUserHandler = async (parent, args, { req }) => {
         const currentUser = await checkAuth(req);
         // admin checking
         const adminCurrent = await adminAuthCheck(currentUser);
-        return isAdmin = adminCurrent?.role === "admin";
+        return (isAdmin = adminCurrent?.role === "admin");
     } catch (error) {
         throw new GraphQLError(error.message, {
             extensions: {
@@ -70,7 +82,7 @@ const getUserHandler = async (parent, args, { req }) => {
         // auth checking
         const currentUser = await checkAuth(req);
         const user = await User.findOne({ email: currentUser.email }).exec();
-        return isUser = user?.role === "user";
+        return (isUser = user?.role === "user");
     } catch (error) {
         throw new GraphQLError(error.message, {
             extensions: {
@@ -106,9 +118,8 @@ module.exports = {
         currentUser: getCurrentUserHandler,
         getAdminUser: getAdminUserHandler,
         getUser: getUserHandler,
-
     },
     Mutation: {
-        createNewUser: createNewUserHandler,
+        createOrUpdateNewUser: createOrUpdateNewUserHandler,
     },
 };

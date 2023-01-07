@@ -16,7 +16,6 @@ exports.checkAuth = async (req) => {
         const currentUser = await admin
             .auth()
             .verifyIdToken(req.headers.authorization);
-            console.log(req.headers.authorization)
         return currentUser;
     } catch (error) {
         throw new GraphQLError("Forbidden Access!", {

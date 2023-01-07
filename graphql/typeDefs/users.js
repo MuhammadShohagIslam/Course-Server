@@ -1,17 +1,15 @@
 module.exports = `
     type User {
         _id: ID!
-        fullName: String!
+        name: String!
         email: String!
-        profileImage: String!
         role: String
     }
 
     # input type
     input UserCreateInput {
-        fullName: String!
+        name: String!
         email: String!
-        profileImage: String!
         role: String
     }
 
@@ -23,6 +21,6 @@ module.exports = `
     }
 
     type Mutation {
-        createNewUser(input: UserCreateInput!): User!
+        createOrUpdateNewUser(input: UserCreateInput!): User!
     }
 `;

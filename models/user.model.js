@@ -3,17 +3,13 @@ const { Schema } = mongoose;
 
 const userSchema = new Schema(
     {
-        fullName: {
+        name: {
             type: String,
         },
         email: {
             type: String,
             required: true,
             index: true,
-        },
-        profileImage: {
-            type: String,
-            required: true,
         },
         role:{
             type: String,
