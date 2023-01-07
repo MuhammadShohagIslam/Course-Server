@@ -1,8 +1,33 @@
 const { GraphQLError } = require("graphql");
 const User = require("../../models/user.model");
+const shortid = require("shortid");
 const { checkAuth, adminAuthCheck } = require("../../helper/checkAuth.helper");
 
-const createOrUpdateNewUserHandler = async (parent, args, { req }) => {
+// user create
+const createNewUserHandler = async (parent, args, { req }) => {
+    try {
+        // auth checking
+        const user = await User.findOne({ email: args.input.email });
+        return user
+            ? user
+            : await new User({
+                  ...args.input,
+                  username: shortid.generate(),
+              }).save();
+    } catch (error) {
+        throw new GraphQLError(error.message, {
+            extensions: {
+                code: 500,
+                http: {
+                    status: 500,
+                },
+            },
+        });
+    }
+};
+
+// profile update
+const profileUpdateHandler = async (parent, args, { req }) => {
     try {
         // auth checking
         const currentUser = await checkAuth(req);
@@ -11,18 +36,7 @@ const createOrUpdateNewUserHandler = async (parent, args, { req }) => {
             { ...args.input },
             { new: true }
         );
-
-        let user;
-        if (updatedUser) {
-            user = updatedUser;
-        } else {
-            const newUser = await new User({
-                ...args.input,
-            }).save();
-            user = newUser;
-        }
-
-        return user;
+        return updatedUser;
     } catch (error) {
         throw new GraphQLError(error.message, {
             extensions: {
@@ -120,6 +134,7 @@ module.exports = {
         getUser: getUserHandler,
     },
     Mutation: {
-        createOrUpdateNewUser: createOrUpdateNewUserHandler,
+        createNewUser: createNewUserHandler,
+        profileUpdate: profileUpdateHandler,
     },
 };

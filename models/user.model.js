@@ -3,22 +3,41 @@ const { Schema } = mongoose;
 
 const userSchema = new Schema(
     {
-        name: {
+        username: {
+            type: String,
+            required: true,
+            unique: true,
+        },
+        fullName: {
             type: String,
         },
         email: {
             type: String,
-            required: true,
             index: true,
+            required: true,
+            unique: true,
         },
-        role:{
+        image: {
+            url: {
+                type: String,
+                default: "https://via.placeholder.com/200x200.png?text=Profile",
+            },
+            public_id: {
+                type: String,
+                public_id: "12345",
+            },
+        },
+        about: {
             type: String,
-            default: "user"
-        }
+        },
+        role: {
+            type: String,
+            default: "user",
+        },
     },
     { timestamps: true }
 );
 
-const User = mongoose.model("User", userSchema);
+const User = mongoose.model("Users", userSchema);
 
 module.exports = User;

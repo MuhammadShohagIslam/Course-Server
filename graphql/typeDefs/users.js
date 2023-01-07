@@ -1,26 +1,50 @@
 module.exports = `
     type User {
         _id: ID!
-        name: String!
+        username: String
+        fullName: String
         email: String!
         role: String
+        about:String
     }
 
-    # input type
-    input UserCreateInput {
-        name: String!
+    type Image implements User{
+        url: String
+        public_id: String
+    }
+    type UserCreate {
+        username: String
+        fullName: String
         email: String!
-        role: String
+    }
+    
+    # input type
+    input Image{
+        url: String
+        public_id: String
+    }
+    input UserCreateInput {
+        fullName: String
+        email: String!
+    }
+
+    input ProfileUpdateInput {
+        username: String
+        fullName: String
+        email: String!
+        image:Image
+        about:String
     }
 
     type Query {
         allUsersByRole(role: String!): [User!]
-        currentUser(email:String!): User!
+        currentUser: User!
         getAdminUser: Boolean!
         getUser: Boolean!
     }
 
     type Mutation {
-        createOrUpdateNewUser(input: UserCreateInput!): User!
+        createNewUser(input: UserCreateInput!): UserCreate
+        profileUpdate(input: ProfileUpdateInput): User! 
     }
 `;

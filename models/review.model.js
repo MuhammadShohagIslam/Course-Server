@@ -8,20 +8,15 @@ const reviewSchema = new Schema(
             type: String,
             index: true,
         },
-        name:{
-            type: String
-        },
-        email:{
-            type: String
-        },
-        img: {
-            type: String,
-        },
         comment: {
             type: String,
         },
         star: {
             type: Number,
+        },
+        _user: {
+            type: ObjectId,
+            ref: "Users"
         },
         _service:{
             type: ObjectId,
