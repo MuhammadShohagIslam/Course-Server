@@ -1,5 +1,4 @@
 module.exports = `
-    scalar Date
     type Service {
         _id: ID!,
         name: String!,
