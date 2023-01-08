@@ -8,6 +8,13 @@
         star: Int!,
         createdAt: Date!
     }
+    type UpdatedReview{
+        acknowledged: Boolean,
+        modifiedCount: Int,
+        upsertedId: String,
+        upsertedCount: Int,
+        matchedCount: Int
+    }
 
     # input type
     input CreateNewReviewInput{
@@ -29,7 +36,7 @@
 
     type Mutation{
         createNewReview(input: CreateNewReviewInput!): Review!,
-        updateReview(reviewId: ID!, input: UpdateReviewInput!): UpdatedService,
+        updateReview(reviewId: ID!, input: UpdateReviewInput!): UpdatedReview,
         removeReview(reviewId: ID!): DeleteService
     }
 `;

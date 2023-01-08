@@ -1,9 +1,8 @@
 const { GraphQLError } = require("graphql");
-const { PubSub } = require('graphql-subscriptions')
+const { PubSub } = require("graphql-subscriptions");
 const Service = require("../../models/service.model");
 const { checkAuth } = require("../../helper/checkAuth.helper");
 const pubsub = new PubSub();
-
 
 // create new service
 const createNewServiceHandler = async (parent, args) => {
@@ -132,7 +131,10 @@ const updateServiceByServiceIdHandler = async (parent, args) => {
         const updateDocument = {
             ...args.input,
         };
-        const updatedService = await Service.updateOne(query, updateDocument);
+        const updatedService = await Service.findByIdAndUpdate(query, updateDocument);
+        pubsub.publish("SERVICE_UPDATED", {
+            serviceRemoved: updatedService,
+        });
         return updatedService;
     } catch (error) {
         throw new GraphQLError(error.message, {
@@ -151,7 +153,12 @@ const deletedServiceByServiceIdHandler = async (parent, args) => {
             const query = {
                 _id: args.serviceId,
             };
+            const service = await Service.findOne(query);
             const removedService = await Service.deleteOne(query);
+
+            pubsub.publish("SERVICE_REMOVED", {
+                serviceRemoved: service,
+            });
             return removedService;
         } catch (error) {
             throw new GraphQLError(error.message, {

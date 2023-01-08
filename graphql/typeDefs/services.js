@@ -10,13 +10,6 @@ module.exports = `
         servicesByPagination: [Service!]!,
         totalService: Int!
     }
-    type UpdatedService{
-        acknowledged: Boolean,
-        modifiedCount: Int,
-        upsertedId: String,
-        upsertedCount: Int,
-        matchedCount: Int
-    }
     type DeleteService{
         acknowledged: Boolean,
         deletedCount: Int
@@ -45,7 +38,7 @@ module.exports = `
     }
     type Mutation{
         createNewService(input:CreateNewServiceInput!):Service! 
-        updateService(serviceId: ID!, input: UpdateServiceInput!): UpdatedService
+        updateService(serviceId: ID!, input: UpdateServiceInput!): Service
         removeService(serviceId: ID!):DeleteService 
     }
     type Subscription{

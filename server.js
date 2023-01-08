@@ -19,6 +19,7 @@ const { authCheckMiddleware } = require("./helper/checkAuth.helper");
 // importing controller
 const { upload, remove } = require("./controllers/cloudinary");
 require("dotenv").config();
+require('events').EventEmitter.prototype._maxListeners = Infinity
 
 const app = express();
 const httpServer = http.createServer(app);
