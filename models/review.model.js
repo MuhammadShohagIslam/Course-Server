@@ -4,10 +4,6 @@ const { ObjectId } = mongoose.Schema;
 
 const reviewSchema = new Schema(
     {
-        serviceName: {
-            type: String,
-            index: true,
-        },
         comment: {
             type: String,
         },

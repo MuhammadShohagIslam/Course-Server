@@ -1,4 +1,5 @@
 module.exports = `
+    scalar Date
     type Service {
         _id: ID!,
         name: String!,
@@ -17,10 +18,11 @@ module.exports = `
         upsertedCount: Int,
         matchedCount: Int
     }
-    type DeleteReview{
+    type DeleteService{
         acknowledged: Boolean,
         deletedCount: Int
     }
+    
    
     # input type
     input CreateNewServiceInput{
@@ -36,6 +38,7 @@ module.exports = `
         img: ImgInput,
         price: String!
     }
+
     type Query {
         getAllServicesUnderLimit(limit: Int): [Service!]!
         getAllServiceByPage(page: Int!): ServiceByPage!
@@ -45,7 +48,7 @@ module.exports = `
     type Mutation{
         createNewService(input:CreateNewServiceInput!):Service! 
         updateService(serviceId: ID!, input: UpdateServiceInput!): UpdatedService
-        removeService(serviceId: ID!):DeleteReview 
+        removeService(serviceId: ID!):DeleteService 
     }
     type Subscription{
         serviceAdded: Service

@@ -1,23 +1,26 @@
 const { GraphQLError } = require("graphql");
-const { PubSub } = require('graphql-subscriptions')
+const { PubSub } = require("graphql-subscriptions");
 const Review = require("../../models/review.model");
+const User = require("../../models/user.model");
 const { checkAuth } = require("../../helper/checkAuth.helper");
 const dateScalar = require("../custom-scaler/date.scaler");
-const pubSub = new PubSub()
+const pubSub = new PubSub();
 
 // create new review
 const createNewReviewHandler = async (parent, args) => {
     try {
-        const reviewObj = {
-            ...args.input,
-        };
-        const isExitsReview = await Review.find({
-            _service: reviewObj.serviceId,
-            email: reviewObj.email,
-        }).exec();
-        if (isExitsReview.length > 0) {
+        const user = await User.findOne({ email: args.input.email }).exec();
+
+        const isExitsReview = await Review.findOne({
+            _user: user._id,
+        })
+            .populate("_service")
+            .populate("_user")
+            .exec();
+
+        if (isExitsReview) {
             throw new GraphQLError(
-                `You Already Reviewed ${reviewObj.serviceName} Service`,
+                `You Already Reviewed ${isExitsReview._service.name} Service`,
                 {
                     extensions: {
                         code: 400,
@@ -26,12 +29,20 @@ const createNewReviewHandler = async (parent, args) => {
                 }
             );
         }
-        const newReview = new Review(reviewObj);
-        const newReviewSave = await newReview.save();
+        const reviewObj = {
+            _service: args.input.serviceId,
+            _user: user._id,
+            comment: args.input.comment,
+            star: args.input.star,
+        };
+        const newReview = await new Review(reviewObj)
+            .save()
+            .then((u) => u.populate("_user"))
+            .then((s) => s.populate("_service"));
         pubSub.publish("REVIEW_ADDED", {
-            reviewAdded: newReviewSave,
+            reviewAdded: newReview,
         });
-        return newReviewSave;
+        return newReview;
     } catch (error) {
         throw new GraphQLError(error.message, {
             extensions: {
@@ -48,10 +59,15 @@ const getAllReviewHandler = async (parent, args) => {
         let reviews;
         if (args.query) {
             reviews = await Review.find({ _service: args.query })
+                .populate("_user")
+                .populate("_service")
                 .sort({ createdAt: -1 })
                 .exec();
         } else {
-            reviews = await Review.find({}).exec();
+            reviews = await Review.find({})
+                .populate("_user")
+                .populate("_service")
+                .exec();
         }
         return reviews;
     } catch (error) {
@@ -75,7 +91,7 @@ const getReviewBySpecificUserHandler = async (parent, args, { req }) => {
             throw new GraphQLError("Unauthorize Access", {
                 extensions: {
                     code: 401,
-                    http: { status: 500 },
+                    http: { status: 401 },
                 },
             });
         }
@@ -150,7 +166,6 @@ const removeReviewByReviewIdHandler = async (parent, args) => {
     }
 };
 
-
 module.exports = {
     Date: dateScalar,
     Query: {
@@ -165,7 +180,7 @@ module.exports = {
     },
     Subscription: {
         reviewAdded: {
-            subscribe: () => pubSub.asyncIterator(['REVIEW_ADDED'])
+            subscribe: () => pubSub.asyncIterator(["REVIEW_ADDED"]),
         },
     },
 };

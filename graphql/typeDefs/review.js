@@ -1,13 +1,9 @@
  module.exports = `
     scalar Date
-    
     type Review{
         _id: ID!,
-        _service: ID!,
-        serviceName: String!,
-        name: String,
-        img: String!,
-        email: String,
+        _service: Service!,
+        _user: User!
         comment: String,
         star: Int!,
         createdAt: Date!
@@ -26,11 +22,8 @@
 
     # input type
     input CreateNewReviewInput{
-        _service: ID!,
-        serviceName: String!,
-        name: String,
+        serviceId: ID!,
         email: String,
-        img: String!,
         comment: String,
         star: Int! 
     }
