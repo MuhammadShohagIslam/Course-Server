@@ -187,5 +187,11 @@ module.exports = {
         serviceAdded: {
             subscribe: () => pubsub.asyncIterator(["SERVICE_ADDED"]),
         },
+        serviceUpdated: {
+            subscribe: () => pubsub.asyncIterator(["SERVICE_UPDATED"]),
+        },
+        serviceRemoved: {
+            subscribe: () => pubsub.asyncIterator(["SERVICE_REMOVED"]),
+        },
     },
 };

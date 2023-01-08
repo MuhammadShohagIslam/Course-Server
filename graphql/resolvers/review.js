@@ -1,10 +1,8 @@
 const { GraphQLError } = require("graphql");
-const { PubSub } = require("graphql-subscriptions");
 const Review = require("../../models/review.model");
 const User = require("../../models/user.model");
 const { checkAuth } = require("../../helper/checkAuth.helper");
 const dateScalar = require("../custom-scaler/date.scaler");
-const pubSub = new PubSub();
 
 // create new review
 const createNewReviewHandler = async (parent, args) => {
@@ -39,9 +37,6 @@ const createNewReviewHandler = async (parent, args) => {
             .save()
             .then((u) => u.populate("_user"))
             .then((s) => s.populate("_service"));
-        pubSub.publish("REVIEW_ADDED", {
-            reviewAdded: newReview,
-        });
         return newReview;
     } catch (error) {
         throw new GraphQLError(error.message, {
@@ -185,10 +180,5 @@ module.exports = {
         createNewReview: createNewReviewHandler,
         updateReview: updateReviewByReviewIdHandler,
         removeReview: removeReviewByReviewIdHandler,
-    },
-    Subscription: {
-        reviewAdded: {
-            subscribe: () => pubSub.asyncIterator(["REVIEW_ADDED"]),
-        },
-    },
+    }
 };

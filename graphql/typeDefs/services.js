@@ -50,5 +50,7 @@ module.exports = `
     }
     type Subscription{
         serviceAdded: Service
+        serviceUpdated: Service
+        serviceRemoved: Service
     }
 `;

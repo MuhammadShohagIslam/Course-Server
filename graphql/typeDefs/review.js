@@ -32,7 +32,4 @@
         updateReview(reviewId: ID!, input: UpdateReviewInput!): UpdatedService,
         removeReview(reviewId: ID!): DeleteService
     }
-    type Subscription{
-        reviewAdded: Review
-    }
 `;
