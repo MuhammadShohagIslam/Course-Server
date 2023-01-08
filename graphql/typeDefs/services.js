@@ -22,7 +22,6 @@ module.exports = `
         acknowledged: Boolean,
         deletedCount: Int
     }
-    
    
     # input type
     input CreateNewServiceInput{

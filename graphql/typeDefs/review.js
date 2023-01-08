@@ -8,17 +8,6 @@
         star: Int!,
         createdAt: Date!
     }
-    type DeleteReview{
-        acknowledged: Boolean,
-        deletedCount: Int
-    }
-    type UpdatedReview{
-        acknowledged: Boolean,
-        modifiedCount: Int,
-        upsertedId: String,
-        upsertedCount: Int,
-        matchedCount: Int
-    }
 
     # input type
     input CreateNewReviewInput{
@@ -40,8 +29,8 @@
 
     type Mutation{
         createNewReview(input: CreateNewReviewInput!): Review!,
-        updateReview(reviewId: ID!, input: UpdateReviewInput!): UpdatedReview!,
-        removeReview(reviewId: ID!): DeleteReview
+        updateReview(reviewId: ID!, input: UpdateReviewInput!): UpdatedService,
+        removeReview(reviewId: ID!): DeleteService
     }
     type Subscription{
         reviewAdded: Review

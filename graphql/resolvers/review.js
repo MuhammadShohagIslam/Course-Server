@@ -84,6 +84,7 @@ const getAllReviewHandler = async (parent, args) => {
 const getReviewBySpecificUserHandler = async (parent, args, { req }) => {
     try {
         const decodedUser = await checkAuth(req);
+        console.log(decodedUser, args.name, args.email);
         if (
             decodedUser.name !== args.name ||
             decodedUser.email !== args.email
@@ -96,7 +97,11 @@ const getReviewBySpecificUserHandler = async (parent, args, { req }) => {
             });
         }
         if (args.email || args.name) {
-            const reviews = await Review.find({ email: args.email }).exec();
+            const user = await User.findOne({ email: args.email }).exec();
+            const reviews = await Review.find({ _user: user._id })
+                .populate("_service")
+                .populate("_user")
+                .exec();
             return reviews;
         }
     } catch (error) {
@@ -115,7 +120,10 @@ const getReviewByReviewIdHandler = async (parent, args) => {
         const query = {
             _id: args.reviewId,
         };
-        const review = await Review.findOne(query);
+        const review = await Review.findOne(query)
+            .populate("_service")
+            .populate("_user")
+            .exec();
         return review;
     } catch (error) {
         throw new GraphQLError(error.message, {
