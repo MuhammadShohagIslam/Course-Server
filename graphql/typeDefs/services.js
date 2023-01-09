@@ -6,10 +6,6 @@ module.exports = `
         img: Img,
         price: String!
     }
-    type ServiceByPage{
-        servicesByPagination: [Service!]!,
-        totalService: Int!
-    }
     type DeleteService{
         acknowledged: Boolean,
         deletedCount: Int
@@ -31,8 +27,8 @@ module.exports = `
     }
 
     type Query {
-        getAllServicesUnderLimit(limit: Int): [Service!]!
-        getAllServiceByPage(page: Int!): ServiceByPage!
+        totalServices: Int!
+        getAllService(page: Int): [Service!]!
         getService(serviceId: ID!):Service!
         getSearchResult(search: String!): [Service!]!
     }
@@ -40,10 +36,5 @@ module.exports = `
         createNewService(input:CreateNewServiceInput!):Service! 
         updateService(serviceId: ID!, input: UpdateServiceInput!): Service
         removeService(serviceId: ID!):DeleteService 
-    }
-    type Subscription{
-        serviceAdded: Service
-        serviceUpdated: Service
-        serviceRemoved: Service
     }
 `;

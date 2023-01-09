@@ -1,8 +1,5 @@
 const { GraphQLError } = require("graphql");
-const { PubSub } = require("graphql-subscriptions");
 const Service = require("../../models/service.model");
-const { checkAuth } = require("../../helper/checkAuth.helper");
-const pubsub = new PubSub();
 
 // create new service
 const createNewServiceHandler = async (parent, args) => {
@@ -12,9 +9,6 @@ const createNewServiceHandler = async (parent, args) => {
         };
         const newService = new Service(serviceObject);
         const newServiceSave = await newService.save();
-        pubsub.publish("SERVICE_ADDED", {
-            serviceAdded: newServiceSave,
-        });
         return newServiceSave;
     } catch (error) {
         throw new GraphQLError(error.message, {
@@ -26,8 +20,8 @@ const createNewServiceHandler = async (parent, args) => {
     }
 };
 
-// get all services by page
-const getAllServiceByPageHandler = async (parent, args) => {
+// get all services
+const getAllServiceHandler = async (parent, args) => {
     try {
         const query = {};
         const sort = {
@@ -37,18 +31,15 @@ const getAllServiceByPageHandler = async (parent, args) => {
         if (args.page) {
             const perPage = 3;
             const page = args.page || 1;
-            const servicesByPagination = await Service.find(query)
+            services = await Service.find(query)
                 .sort(sort)
                 .skip(perPage * (page - 1))
                 .limit(perPage)
                 .exec();
-            const totalService = await Service.find(query)
-                .estimatedDocumentCount()
-                .exec();
-            services = {
-                servicesByPagination,
-                totalService,
-            };
+        }else{
+            services = await Service.find(query)
+            .sort(sort)
+            .exec(); 
         }
         return services;
     } catch (error) {
@@ -60,24 +51,13 @@ const getAllServiceByPageHandler = async (parent, args) => {
         });
     }
 };
-// get all services under the limit
-const getAllServicesUnderLimitHandler = async (parent, args) => {
+// get total services
+const totalServicesHandler = async (parent, args) => {
     try {
-        const query = {};
-        const sort = {
-            createdAt: -1,
-        };
-
-        let services;
-        if (args.limit) {
-            services = await Service.find(query)
-                .sort(sort)
-                .limit(args.limit)
-                .exec();
-        } else {
-            services = await Service.find(query).sort(sort).exec();
-        }
-        return services;
+        const totalService = await Service.find({})
+            .estimatedDocumentCount()
+            .exec();
+        return totalService;
     } catch (error) {
         throw new GraphQLError(error.message, {
             extensions: {
@@ -131,10 +111,10 @@ const updateServiceByServiceIdHandler = async (parent, args) => {
         const updateDocument = {
             ...args.input,
         };
-        const updatedService = await Service.findByIdAndUpdate(query, updateDocument);
-        pubsub.publish("SERVICE_UPDATED", {
-            serviceRemoved: updatedService,
-        });
+        const updatedService = await Service.findByIdAndUpdate(
+            query,
+            updateDocument
+        );
         return updatedService;
     } catch (error) {
         throw new GraphQLError(error.message, {
@@ -153,12 +133,7 @@ const deletedServiceByServiceIdHandler = async (parent, args) => {
             const query = {
                 _id: args.serviceId,
             };
-            const service = await Service.findOne(query);
             const removedService = await Service.deleteOne(query);
-
-            pubsub.publish("SERVICE_REMOVED", {
-                serviceRemoved: service,
-            });
             return removedService;
         } catch (error) {
             throw new GraphQLError(error.message, {
@@ -180,8 +155,8 @@ const deletedServiceByServiceIdHandler = async (parent, args) => {
 
 module.exports = {
     Query: {
-        getAllServiceByPage: getAllServiceByPageHandler,
-        getAllServicesUnderLimit: getAllServicesUnderLimitHandler,
+        totalServices: totalServicesHandler,
+        getAllService: getAllServiceHandler,
         getService: getServiceByServiceIdHandler,
         getSearchResult: getSearchResultHandler,
     },
@@ -189,16 +164,5 @@ module.exports = {
         createNewService: createNewServiceHandler,
         updateService: updateServiceByServiceIdHandler,
         removeService: deletedServiceByServiceIdHandler,
-    },
-    Subscription: {
-        serviceAdded: {
-            subscribe: () => pubsub.asyncIterator(["SERVICE_ADDED"]),
-        },
-        serviceUpdated: {
-            subscribe: () => pubsub.asyncIterator(["SERVICE_UPDATED"]),
-        },
-        serviceRemoved: {
-            subscribe: () => pubsub.asyncIterator(["SERVICE_REMOVED"]),
-        },
     },
 };

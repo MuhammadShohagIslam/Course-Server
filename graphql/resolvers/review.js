@@ -1,8 +1,10 @@
 const { GraphQLError } = require("graphql");
+const { PubSub } = require("graphql-subscriptions");
 const Review = require("../../models/review.model");
 const User = require("../../models/user.model");
 const { checkAuth } = require("../../helper/checkAuth.helper");
 const dateScalar = require("../custom-scaler/date.scaler");
+const pubsub = new PubSub();
 
 // create new review
 const createNewReviewHandler = async (parent, args) => {
@@ -11,6 +13,7 @@ const createNewReviewHandler = async (parent, args) => {
 
         const isExitsReview = await Review.findOne({
             _user: user._id,
+            _service: args.input.serviceId,
         })
             .populate("_service")
             .populate("_user")
@@ -37,6 +40,10 @@ const createNewReviewHandler = async (parent, args) => {
             .save()
             .then((u) => u.populate("_user"))
             .then((s) => s.populate("_service"));
+
+        pubsub.publish("ADDED_REVIEW", {
+            addedReview: newReview,
+        });
         return newReview;
     } catch (error) {
         throw new GraphQLError(error.message, {
@@ -79,7 +86,6 @@ const getAllReviewHandler = async (parent, args) => {
 const getReviewBySpecificUserHandler = async (parent, args, { req }) => {
     try {
         const decodedUser = await checkAuth(req);
-        console.log(decodedUser, args.name, args.email);
         if (
             decodedUser.name !== args.name ||
             decodedUser.email !== args.email
@@ -139,7 +145,17 @@ const updateReviewByReviewIdHandler = async (parent, args) => {
         const updateDocument = {
             ...args.input,
         };
-        const updatedReview = await Review.updateOne(query, updateDocument);
+        const updatedReview = await Review.findByIdAndUpdate(
+            query,
+            updateDocument
+        )
+            .populate("_service")
+            .populate("_user");
+
+        pubsub.publish("UPDATED_REVIEW", {
+            updatedReview: updatedReview,
+        });
+
         return updatedReview;
     } catch (error) {
         throw new GraphQLError(error.message, {
@@ -157,7 +173,14 @@ const removeReviewByReviewIdHandler = async (parent, args) => {
         const query = {
             _id: args.reviewId,
         };
+        const review = await Review.findOne(query)
+            .populate("_service")
+            .populate("_user")
+            .exec();
         const removedReview = await Review.deleteOne(query);
+        pubsub.publish("REMOVED_REVIEW", {
+            deletedReview: review,
+        });
         return removedReview;
     } catch (error) {
         throw new GraphQLError(error.message, {
@@ -178,7 +201,18 @@ module.exports = {
     },
     Mutation: {
         createNewReview: createNewReviewHandler,
-        updateReview: updateReviewByReviewIdHandler,
+        reviewUpdated: updateReviewByReviewIdHandler,
         removeReview: removeReviewByReviewIdHandler,
-    }
+    },
+    Subscription: {
+        addedReview: {
+            subscribe: () => pubsub.asyncIterator(["ADDED_REVIEW"]),
+        },
+        updatedReview: {
+            subscribe: () => pubsub.asyncIterator(["UPDATED_REVIEW"]),
+        },
+        deletedReview: {
+            subscribe: () => pubsub.asyncIterator(["REMOVED_REVIEW"]),
+        },
+    },
 };

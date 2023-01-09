@@ -1,19 +1,12 @@
- module.exports = `
+module.exports = `
     scalar Date
     type Review{
         _id: ID!,
-        _service: Service!,
-        _user: User!
+        _service: Service,
+        _user: User
         comment: String,
         star: Int!,
         createdAt: Date!
-    }
-    type UpdatedReview{
-        acknowledged: Boolean,
-        modifiedCount: Int,
-        upsertedId: String,
-        upsertedCount: Int,
-        matchedCount: Int
     }
 
     # input type
@@ -27,7 +20,10 @@
         comment: String,
         star: Int!,
     }
-
+    type DeleteReview{
+        acknowledged: Boolean,
+        deletedCount: Int
+    }
     type Query{
         getAllReview(query:ID): [Review!]!,
         getReview(reviewId: ID!): Review!,
@@ -36,7 +32,12 @@
 
     type Mutation{
         createNewReview(input: CreateNewReviewInput!): Review!,
-        updateReview(reviewId: ID!, input: UpdateReviewInput!): UpdatedReview,
-        removeReview(reviewId: ID!): DeleteService
+        reviewUpdated(reviewId: ID!, input: UpdateReviewInput!): Review,
+        removeReview(reviewId: ID!): DeleteReview
+    }
+    type Subscription{
+        addedReview: Review
+        updatedReview: Review
+        deletedReview: Review
     }
 `;
