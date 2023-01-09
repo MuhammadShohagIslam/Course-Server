@@ -152,8 +152,13 @@ const updateReviewByReviewIdHandler = async (parent, args) => {
             .populate("_service")
             .populate("_user");
 
+        const review = await Review.findOne(query)
+            .populate("_service")
+            .populate("_user")
+            .exec();
+
         pubsub.publish("UPDATED_REVIEW", {
-            updatedReview: updatedReview,
+            updatedReview: review,
         });
 
         return updatedReview;
