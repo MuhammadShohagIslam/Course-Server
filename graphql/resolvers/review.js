@@ -8,132 +8,93 @@ const pubsub = new PubSub();
 
 // create new review
 const createNewReviewHandler = async (parent, args) => {
-    try {
-        const user = await User.findOne({ email: args.input.email }).exec();
+    const user = await User.findOne({ email: args.input.email }).exec();
 
-        const isExitsReview = await Review.findOne({
-            _user: user._id,
-            _service: args.input.serviceId,
-        })
-            .populate("_service")
-            .populate("_user")
-            .exec();
+    const isExitsReview = await Review.findOne({
+        _user: user._id,
+        _service: args.input.serviceId,
+    })
+        .populate("_service")
+        .populate("_user")
+        .exec();
 
-        if (isExitsReview) {
-            throw new GraphQLError(
-                `You Already Reviewed ${isExitsReview._service.name} Service`,
-                {
-                    extensions: {
-                        code: 400,
-                        http: { status: 400 },
-                    },
-                }
-            );
-        }
-        const reviewObj = {
-            _service: args.input.serviceId,
-            _user: user._id,
-            comment: args.input.comment,
-            star: args.input.star,
-        };
-        const newReview = await new Review(reviewObj)
-            .save()
-            .then((u) => u.populate("_user"))
-            .then((s) => s.populate("_service"));
-
-        pubsub.publish("ADDED_REVIEW", {
-            addedReview: newReview,
-        });
-        return newReview;
-    } catch (error) {
-        throw new GraphQLError(error.message, {
-            extensions: {
-                code: 500,
-                http: { status: 500 },
-            },
-        });
+    if (isExitsReview) {
+        throw new GraphQLError(
+            `You Already Reviewed ${isExitsReview._service.name} Service`,
+            {
+                extensions: {
+                    code: 400,
+                    http: { status: 400 },
+                },
+            }
+        );
     }
+    const reviewObj = {
+        _service: args.input.serviceId,
+        _user: user._id,
+        comment: args.input.comment,
+        star: args.input.star,
+    };
+    const newReview = await new Review(reviewObj)
+        .save()
+        .then((u) => u.populate("_user"))
+        .then((s) => s.populate("_service"));
+
+    pubsub.publish("ADDED_REVIEW", {
+        addedReview: newReview,
+    });
+    return newReview;
 };
 
 // get all reviews
 const getAllReviewHandler = async (parent, args) => {
-    try {
-        let reviews;
-        if (args.query) {
-            reviews = await Review.find({ _service: args.query })
-                .populate("_user")
-                .populate("_service")
-                .sort({ createdAt: -1 })
-                .exec();
-        } else {
-            reviews = await Review.find({})
-                .populate("_user")
-                .populate("_service")
-                .exec();
-        }
-        return reviews;
-    } catch (error) {
-        throw new GraphQLError(error.message, {
-            extensions: {
-                code: 500,
-                http: { status: 500 },
-            },
-        });
+    let reviews;
+    if (args.query) {
+        reviews = await Review.find({ _service: args.query })
+            .populate("_user")
+            .populate("_service")
+            .sort({ createdAt: -1 })
+            .exec();
+    } else {
+        reviews = await Review.find({})
+            .populate("_user")
+            .populate("_service")
+            .exec();
     }
+    return reviews;
 };
 
 // get all reviews by specific user
 const getReviewBySpecificUserHandler = async (parent, args, { req }) => {
-    try {
-        const decodedUser = await checkAuth(req);
-        if (
-            decodedUser.name !== args.name ||
-            decodedUser.email !== args.email
-        ) {
-            throw new GraphQLError("Unauthorize Access", {
-                extensions: {
-                    code: 401,
-                    http: { status: 401 },
-                },
-            });
-        }
-        if (args.email || args.name) {
-            const user = await User.findOne({ email: args.email }).exec();
-            const reviews = await Review.find({ _user: user._id })
-                .populate("_service")
-                .populate("_user")
-                .exec();
-            return reviews;
-        }
-    } catch (error) {
-        throw new GraphQLError(error.message, {
+    const decodedUser = await checkAuth(req);
+    if (decodedUser.name !== args.name || decodedUser.email !== args.email) {
+        throw new GraphQLError("Unauthorize Access", {
             extensions: {
-                code: 500,
-                http: { status: 500 },
+                code: 401,
+                http: { status: 401 },
             },
         });
+    }
+    if (args.email || args.name) {
+        const user = await User.findOne({ email: args.email }).exec();
+        const reviews = await Review.find({ _user: user._id })
+            .populate("_service")
+            .populate("_user")
+            .exec();
+        return reviews;
     }
 };
 
 // get review by reviewId
 const getReviewByReviewIdHandler = async (parent, args) => {
-    try {
-        const query = {
-            _id: args.reviewId,
-        };
-        const review = await Review.findOne(query)
-            .populate("_service")
-            .populate("_user")
-            .exec();
-        return review;
-    } catch (error) {
-        throw new GraphQLError(error.message, {
-            extensions: {
-                code: 500,
-                http: { status: 500 },
-            },
-        });
-    }
+    const query = {
+        _id: args.reviewId,
+    };
+    const review = await Review.findOne(query)
+        .populate("_service")
+        .populate("_user")
+        .exec();
+    return review;
 };
 
 // update review by reviewId
@@ -165,7 +126,7 @@ const updateReviewByReviewIdHandler = async (parent, args) => {
     } catch (error) {
         throw new GraphQLError(error.message, {
             extensions: {
-                code: 500,
+                code: error.extensions?.code,
                 http: { status: 500 },
             },
         });

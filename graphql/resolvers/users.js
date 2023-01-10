@@ -17,7 +17,7 @@ const createNewUserHandler = async (parent, args, { req }) => {
     } catch (error) {
         throw new GraphQLError(error.message, {
             extensions: {
-                code: 500,
+                code: "INTERNAL_SERVER_ERROR",
                 http: {
                     status: 500,
                 },
@@ -40,7 +40,7 @@ const profileUpdateHandler = async (parent, args, { req }) => {
     } catch (error) {
         throw new GraphQLError(error.message, {
             extensions: {
-                code: 500,
+                code: "INTERNAL_SERVER_ERROR",
                 http: {
                     status: 500,
                 },
@@ -54,8 +54,10 @@ const getAllUsersByRoleHandler = async (parent, args, { req }) => {
     try {
         // auth checking
         const currentUser = await checkAuth(req);
+       
         // admin checking
         const adminCurrent = await adminAuthCheck(currentUser);
+      
         let users;
         if (adminCurrent) {
             users = await User.find({ role: "user" }).exec();
@@ -64,7 +66,7 @@ const getAllUsersByRoleHandler = async (parent, args, { req }) => {
     } catch (error) {
         throw new GraphQLError(error.message, {
             extensions: {
-                code: 500,
+                code: error.extensions?.code,
                 http: {
                     status: 500,
                 },
@@ -79,11 +81,12 @@ const getAdminUserHandler = async (parent, args, { req }) => {
         const currentUser = await checkAuth(req);
         // admin checking
         const adminCurrent = await adminAuthCheck(currentUser);
-        return (isAdmin = adminCurrent?.role === "admin");
+        const user = await User.findOne({ email: adminCurrent.email }).exec();
+        return (isAdmin = user?.role === "admin");
     } catch (error) {
         throw new GraphQLError(error.message, {
             extensions: {
-                code: 500,
+                code:error.extensions?.code,
                 http: {
                     status: 500,
                 },
@@ -117,7 +120,7 @@ const getCurrentUserHandler = async (parent, args, { req }) => {
     } catch (error) {
         throw new GraphQLError(error.message, {
             extensions: {
-                code: 500,
+                code: "INTERNAL_SERVER_ERROR",
                 http: {
                     status: 500,
                 },

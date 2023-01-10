@@ -12,21 +12,23 @@ exports.checkAuth = async (req) => {
                     http: { status: 401 },
                 },
             });
-           
         }
         const currentUser = await admin
             .auth()
             .verifyIdToken(req.headers.authorization);
         return currentUser;
     } catch (error) {
-        throw new GraphQLError("Forbidden Access!", {
-            extensions: {
-                code: "FORBIDDEN",
-                http: {
-                    status: 403,
+        throw new GraphQLError(
+            error.message ? error.message : "Forbidden Access!",
+            {
+                extensions: {
+                    code: error.extensions?.code || "FORBIDDEN",
+                    http: {
+                        status: error.extensions?.code.http?.status || 403,
+                    },
                 },
-            },
-        });
+            }
+        );
     }
 };
 
@@ -34,8 +36,8 @@ exports.checkAuth = async (req) => {
 exports.adminAuthCheck = async (currentUser) => {
     try {
         const decodedEmail = currentUser.email;
-        console.log(currentUser, "decoded");
         const query = { email: decodedEmail };
+       
         const user = await User.findOne(query).exec();
         if (user?.role !== "admin") {
             throw new GraphQLError("Forbidden Access!", {
@@ -51,9 +53,9 @@ exports.adminAuthCheck = async (currentUser) => {
     } catch (error) {
         throw new GraphQLError(error.message, {
             extensions: {
-                code: 500,
+                code: error.extensions?.code,
                 http: {
-                    status: 500,
+                    status: error.extensions?.code.http?.status,
                 },
             },
         });
