@@ -11,10 +11,9 @@ const createNewServiceHandler = async (parent, args) => {
         const newServiceSave = await newService.save();
         return newServiceSave;
     } catch (error) {
-        throw new GraphQLError(error.message, {
+        throw new GraphQLError(error.message || "Server Error", {
             extensions: {
-                code: 500,
-                http: { status: 500 },
+                code: error.extensions?.code || "INTERNAL_SERVER_ERROR",
             },
         });
     }
@@ -36,17 +35,14 @@ const getAllServiceHandler = async (parent, args) => {
                 .skip(perPage * (page - 1))
                 .limit(perPage)
                 .exec();
-        }else{
-            services = await Service.find(query)
-            .sort(sort)
-            .exec(); 
+        } else {
+            services = await Service.find(query).sort(sort).exec();
         }
         return services;
     } catch (error) {
-        throw new GraphQLError(error.message, {
+        throw new GraphQLError(error.message || "Server Error", {
             extensions: {
-                code: 501,
-                http: { status: 501 },
+                code: error.extensions?.code || "INTERNAL_SERVER_ERROR",
             },
         });
     }
@@ -59,10 +55,9 @@ const totalServicesHandler = async (parent, args) => {
             .exec();
         return totalService;
     } catch (error) {
-        throw new GraphQLError(error.message, {
+        throw new GraphQLError(error.message || "Server Error", {
             extensions: {
-                code: 501,
-                http: { status: 501 },
+                code: error.extensions?.code || "INTERNAL_SERVER_ERROR",
             },
         });
     }
@@ -76,10 +71,9 @@ const getSearchResultHandler = async (parent, args) => {
         }).exec();
         return services;
     } catch (error) {
-        throw new GraphQLError(error.message, {
+        throw new GraphQLError(error.message || "Server Error", {
             extensions: {
-                code: 500,
-                http: { status: 500 },
+                code: error.extensions?.code || "INTERNAL_SERVER_ERROR",
             },
         });
     }
@@ -94,10 +88,9 @@ const getServiceByServiceIdHandler = async (parent, args) => {
         const service = await Service.findOne(query);
         return service;
     } catch (error) {
-        throw new GraphQLError(error.message, {
+        throw new GraphQLError(error.message || "Server Error", {
             extensions: {
-                code: 500,
-                http: { status: 500 },
+                code: error.extensions?.code || "INTERNAL_SERVER_ERROR",
             },
         });
     }
@@ -117,10 +110,9 @@ const updateServiceByServiceIdHandler = async (parent, args) => {
         );
         return updatedService;
     } catch (error) {
-        throw new GraphQLError(error.message, {
+        throw new GraphQLError(error.message || "Server Error", {
             extensions: {
-                code: 500,
-                http: { status: 500 },
+                code: error.extensions?.code || "INTERNAL_SERVER_ERROR",
             },
         });
     }
@@ -144,10 +136,9 @@ const deletedServiceByServiceIdHandler = async (parent, args) => {
             });
         }
     } catch (error) {
-        throw new GraphQLError(error.message, {
+        throw new GraphQLError(error.message || "Server Error", {
             extensions: {
-                code: 500,
-                http: { status: 500 },
+                code: error.extensions?.code || "INTERNAL_SERVER_ERROR",
             },
         });
     }

@@ -7,12 +7,9 @@ const getAllBlogsHandler = async (parent, args) => {
     try {
         return await Blog.find({}).exec();
     } catch (error) {
-        throw new GraphQLError(error.message, {
+        throw new GraphQLError(error.message || "Server Error", {
             extensions: {
-                code: 500,
-                http: {
-                    status: 500,
-                },
+                code: error.extensions?.code || "INTERNAL_SERVER_ERROR",
             },
         });
     }
