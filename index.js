@@ -19,22 +19,11 @@ const { authCheckMiddleware } = require("./helper/checkAuth.helper");
 // importing controller
 const { upload, remove } = require("./controllers/cloudinary");
 require("dotenv").config();
-require('events').EventEmitter.prototype._maxListeners = Infinity
+require("events").EventEmitter.prototype._maxListeners = Infinity;
 
 const app = express();
 const httpServer = http.createServer(app);
-const PORT = process.env.PORT;
-
-app.use([
-    cors(),
-    json({ limit: "50mb" }),
-    urlencoded({ limit: "50mb", extended: true }),
-]);
-
-// Rest API endpoint
-app.get("/rest", (req, res) => {
-    res.send("GraphQL Server is RestAPI");
-});
+const PORT = process.env.PORT || 8000;
 
 // graphql server
 async function startApolloServer(typeDefs, resolvers) {
@@ -71,12 +60,21 @@ async function startApolloServer(typeDefs, resolvers) {
     await server.start();
     app.use(
         "/graphql",
-        cors(),
-        json(),
+        cors({ origin: true, credentials: true }),
+        json({ limit: "50mb" }),
+        urlencoded({ limit: "50mb", extended: true }),
         expressMiddleware(server, {
             context: ({ req }) => ({ req, pubSub }),
         })
     );
+    app.use((req, res, next) => {
+        res.header("Access-Control-Allow-Origin", "*");
+        next();
+    });
+    // Rest API endpoint
+    app.get("/rest", (req, res) => {
+        res.send("GraphQL Server is RestAPI");
+    });
 
     // upload and remove images
     app.post("/upload-images", authCheckMiddleware, upload);
