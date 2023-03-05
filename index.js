@@ -25,6 +25,7 @@ const app = express();
 const httpServer = http.createServer(app);
 const PORT = process.env.PORT || 8000;
 
+app.use([json(), urlencoded({ extended: true }), cors()]);
 // graphql server
 async function startApolloServer(typeDefs, resolvers) {
     const schema = makeExecutableSchema({ typeDefs, resolvers });
@@ -67,10 +68,7 @@ async function startApolloServer(typeDefs, resolvers) {
             context: ({ req }) => ({ req, pubSub }),
         })
     );
-    app.use((req, res, next) => {
-        res.header("Access-Control-Allow-Origin", "*");
-        next();
-    });
+
     // Rest API endpoint
     app.get("/rest", (req, res) => {
         res.send("GraphQL Server is RestAPI");
