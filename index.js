@@ -1,7 +1,9 @@
 const express = require("express");
+const cloudinary = require("cloudinary").v2;
 const http = require("http");
 const cors = require("cors");
 const { json, urlencoded } = require("body-parser");
+const bodyParser = require("body-parser");
 const { mongo_db_run } = require("./configs/mongodb");
 // graphql
 const { ApolloServer } = require("@apollo/server");
@@ -14,10 +16,10 @@ const {
 } = require("@apollo/server/plugin/drainHttpServer");
 const { PubSub } = require("graphql-subscriptions");
 const { typeDefs, resolvers } = require("./graphql/schema");
-// importing middleware
-const { authCheckMiddleware } = require("./helper/checkAuth.helper");
-// importing controller
-const { upload, remove } = require("./controllers/cloudinary");
+// // importing middleware
+// const { authCheckMiddleware } = require("./helper/checkAuth.helper");
+// // importing controller
+// const { upload, remove } = require("./controllers/cloudinary");
 require("dotenv").config();
 require("events").EventEmitter.prototype._maxListeners = Infinity;
 
@@ -25,7 +27,11 @@ const app = express();
 const httpServer = http.createServer(app);
 const PORT = process.env.PORT || 8000;
 
-app.use([json(), urlencoded({ extended: true }), cors()]);
+app.use(bodyParser.json({ limit: "50mb" }));
+app.use(bodyParser.urlencoded({ limit: "50mb", extended: true }));
+app.use(express.json());
+app.use([cors()]);
+
 // graphql server
 async function startApolloServer(typeDefs, resolvers) {
     const schema = makeExecutableSchema({ typeDefs, resolvers });
@@ -58,12 +64,14 @@ async function startApolloServer(typeDefs, resolvers) {
             },
         ],
     });
+
     await server.start();
+
     app.use(
         "/graphql",
         cors({ origin: true, credentials: true }),
-        json({ limit: "50mb" }),
-        urlencoded({ limit: "50mb", extended: true }),
+        json({ limit: "500mb" }),
+        urlencoded({ extended: true, parameterLimit: 100000, limit: "500mb" }),
         expressMiddleware(server, {
             context: ({ req }) => ({ req, pubSub }),
         })
@@ -74,13 +82,22 @@ async function startApolloServer(typeDefs, resolvers) {
         res.send("GraphQL Server is RestAPI");
     });
 
-    // upload and remove images
-    app.post("/upload-images", authCheckMiddleware, upload);
-    app.post("/remove-images", authCheckMiddleware, remove);
+    // // upload and remove images
+    // app.post("/upload-images", authCheckMiddleware, upload);
+    // app.post("/remove-images", authCheckMiddleware, remove);
 
     const serverListen = new Promise((resolve) =>
         httpServer.listen({ port: PORT }, resolve)
     );
+
+    // cloudinary configaration
+    cloudinary.config({
+        cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+        api_key: process.env.CLOUDINARY_API_KEY,
+        api_secret: process.env.CLOUDINARY_API_SECRET,
+        secure: true,
+    });
+
     serverListen.then(() => {
         mongo_db_run();
         console.log(
